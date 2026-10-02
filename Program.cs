@@ -58,7 +58,7 @@ class Program
                             break;
 
                         case ConsoleKey.DownArrow:
-                            if (Move(0, 1)) ;
+                            Move(0, 1);
                             break;
 
                         case ConsoleKey.UpArrow:
@@ -67,7 +67,6 @@ class Program
                             break;
 
                         case ConsoleKey.Escape:
-                            Console.CursorVisible = true;
                             return;
                     }
                 }
@@ -98,6 +97,8 @@ class Program
 
             Console.SetCursorPosition(0, Height + 3);
 
+            Console.Clear();
+
             Console.WriteLine("╔════════════════════════════╗");
             Console.WriteLine("║       ИГРА ОКОНЧЕНА!       ║");
             Console.WriteLine("╚════════════════════════════╝");
@@ -112,13 +113,11 @@ class Program
 
                 if (key == ConsoleKey.Enter)
                 {
-                    // Начинаем новую игру
                     break;
                 }
 
                 if (key == ConsoleKey.Escape)
                 {
-                    Console.CursorVisible = true;
                     return;
                 }
             }
@@ -311,9 +310,9 @@ class Program
         Console.WriteLine("╚════════════════════╝");
         Console.WriteLine($"Счёт: {score}");
         Console.WriteLine();
-        Console.WriteLine("← → — движение");
-        Console.WriteLine("↓ — ускорить падение");
-        Console.WriteLine("↑ / Пробел — поворот");
+        Console.WriteLine("вправо / влево — движение");
+        Console.WriteLine("вниз — ускорить падение");
+        Console.WriteLine("вверх / пробел — поворот фигуры");
         Console.WriteLine("Esc — выход");
     }
 }
