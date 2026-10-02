@@ -12,7 +12,7 @@ class Program
     static Random random = new Random();
 
     static int score = 0;
-    static int[,] currentPiece;
+    static int[,] currentPiece = new int[1, 1];
     static int pieceX, pieceY;
     static bool gameOver = false;
 
@@ -58,8 +58,7 @@ class Program
                             break;
 
                         case ConsoleKey.DownArrow:
-                            if (Move(0, 1))
-                                score++;
+                            if (Move(0, 1)) ;
                             break;
 
                         case ConsoleKey.UpArrow:
@@ -78,32 +77,23 @@ class Program
                 {
                     if (!Move(0, 1))
                     {
-                        // Фигура достигла дна
                         LockPiece();
-
-                        // Удаляем заполненные линии
                         ClearLines();
-
-                        // Создаём новую фигуру
                         SpawnPiece();
-
-                        // Увеличиваем скорость
                         fallDelay = Math.Max(
                             100,
-                            500 - score / 50 * 20
+                            500 - score / 50 * 10
                         );
                     }
 
                     lastFall = DateTime.Now;
                 }
 
-                // Отрисовка
                 Draw();
 
                 Thread.Sleep(30);
             }
 
-            // Последняя отрисовка поля
             Draw();
 
             Console.SetCursorPosition(0, Height + 3);
@@ -116,8 +106,7 @@ class Program
             Console.WriteLine("Нажмите ENTER, чтобы начать заново.");
             Console.WriteLine("Нажмите ESC, чтобы выйти.");
 
-            // Ждём именно клавишу игрока
-            while (true)
+            while (true)// Ожидание ввода пользователя для перезапуска или выхода
             {
                 ConsoleKey key = Console.ReadKey(true).Key;
 
