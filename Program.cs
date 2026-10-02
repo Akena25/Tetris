@@ -1,21 +1,28 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-
+class GameField
+{
+    public const int Width = 10;
+    public const int Height = 20;
+    public int[,] Field { get; private set; }
+    public GameField()
+    {
+        Field = new int[Height, Width];
+    }
+    public void Clear()
+    {
+        Field = new int[Height, Width];
+    }
+}
 class Program
 {
-    const int Width = 10;
-    const int Height = 20;
-
-    static int[,] field = new int[Height, Width];
+    static GameField gameField = new GameField();
     static Random random = new Random();
-
     static int score = 0;
     static int[,] currentPiece = new int[1, 1];
     static int pieceX, pieceY;
     static bool gameOver = false;
-
     static int[][,] pieces =
     {
     new int[,] { { 1, 1, 1, 1 } }, // I
@@ -26,24 +33,17 @@ class Program
     new int[,] { { 0, 1, 1 }, { 1, 1, 0 } }, // S
     new int[,] { { 1, 1, 0 }, { 0, 1, 1 } } // Z
 };
-
-    static void Main()
+    static void Main() // Главный цикл игры
     {
         Console.CursorVisible = false;
-
         while (true)
         {
-            // Начинаем новую игру
-            RestartGame();
-
+            RestartGame(); // Перезапуск игры
             DateTime lastFall = DateTime.Now;
             int fallDelay = 500;
-
-            // Игровой цикл
             while (!gameOver)
             {
-                // Управление
-                if (Console.KeyAvailable)
+                if (Console.KeyAvailable) // Обработка ввода пользователя
                 {
                     ConsoleKey key = Console.ReadKey(true).Key;
 
@@ -71,8 +71,7 @@ class Program
                     }
                 }
 
-                // Автоматическое падение фигуры
-                if ((DateTime.Now - lastFall).TotalMilliseconds >= fallDelay)
+                if ((DateTime.Now - lastFall).TotalMilliseconds >= fallDelay) // Автоматическое падение фигуры
                 {
                     if (!Move(0, 1))
                     {
@@ -92,13 +91,9 @@ class Program
 
                 Thread.Sleep(30);
             }
-
             Draw();
-
-            Console.SetCursorPosition(0, Height + 3);
-
+            Console.SetCursorPosition(0, GameField.Height + 3);
             Console.Clear();
-
             Console.WriteLine("╔════════════════════════════╗");
             Console.WriteLine("║       ИГРА ОКОНЧЕНА!       ║");
             Console.WriteLine("╚════════════════════════════╝");
@@ -110,7 +105,6 @@ class Program
             while (true)// Ожидание ввода пользователя для перезапуска или выхода
             {
                 ConsoleKey key = Console.ReadKey(true).Key;
-
                 if (key == ConsoleKey.Enter)
                 {
                     break;
@@ -123,26 +117,23 @@ class Program
             }
         }
     }
-
     static void SpawnPiece() // Создание новой фигуры
     {
         currentPiece = pieces[random.Next(pieces.Length)];
-        pieceX = Width / 2 - currentPiece.GetLength(1) / 2;
+        pieceX = GameField.Width / 2 - currentPiece.GetLength(1) / 2;
         pieceY = 0;
 
         if (Collision(pieceX, pieceY, currentPiece))
             gameOver = true;
     }
-
     static void RestartGame() // Перезапуск игры
     {
         Console.Clear();
-        field = new int[Height, Width];
+        gameField.Clear();
         score = 0;
         gameOver = false;
         SpawnPiece();
     }
-
     static bool Collision(int x, int y, int[,] piece) // Проверка столкновения фигуры с границами поля или другими фигурами
     {
         for (int r = 0; r < piece.GetLength(0); r++)
@@ -151,21 +142,17 @@ class Program
             {
                 if (piece[r, c] == 0)
                     continue;
-
                 int nx = x + c;
                 int ny = y + r;
-
-                if (nx < 0 || nx >= Width || ny >= Height)
+                if (nx < 0 || nx >= GameField.Width || ny >= GameField.Height)
                     return true;
-
-                if (ny >= 0 && field[ny, nx] != 0)
+                if (ny >= 0 && gameField.Field[ny, nx] != 0)
                     return true;
             }
         }
 
         return false;
     }
-
     static bool Move(int dx, int dy) // Перемещение фигуры
     {
         if (!Collision(pieceX + dx, pieceY + dy, currentPiece))
@@ -177,7 +164,6 @@ class Program
 
         return false;
     }
-
     static void Rotate() // Поворот фигуры
     {
         int rows = currentPiece.GetLength(0);
@@ -196,7 +182,6 @@ class Program
         if (!Collision(pieceX, pieceY, rotated))
             currentPiece = rotated;
     }
-
     static void LockPiece() // Закрепление фигуры на игровом поле
     {
         for (int r = 0; r < currentPiece.GetLength(0); r++)
@@ -209,47 +194,49 @@ class Program
                     int y = pieceY + r;
 
                     if (y >= 0)
-                        field[y, x] = 1;
+                        gameField.Field[y, x] = 1;
                 }
             }
         }
     }
-
     static void ClearLines() // Очистка заполненных линий и начисление очков
     {
         int linesCleared = 0;
 
-        for (int r = Height - 1; r >= 0; r--)
+        for (int row = GameField.Height - 1; row >= 0; row--)
         {
-            bool full = true;
+            bool isFull = true;
 
-            for (int c = 0; c < Width; c++)
+            for (int col = 0; col < GameField.Width; col++)
             {
-                if (field[r, c] == 0)
+                if (gameField.Field[row, col] == 0)
                 {
-                    full = false;
+                    isFull = false;
                     break;
                 }
             }
 
-            if (full)
+            if (isFull)
             {
                 linesCleared++;
 
-                for (int row = r; row > 0; row--)
+                for (int r = row; r > 0; r--) // Сдвигаем все строки вниз
                 {
-                    for (int c = 0; c < Width; c++)
-                        field[row, c] = field[row - 1, c];
+                    for (int col = 0; col < GameField.Width; col++)
+                    {
+                        gameField.Field[r, col] =
+                            gameField.Field[r - 1, col];
+                    }
                 }
-
-                for (int c = 0; c < Width; c++)
-                    field[0, c] = 0;
-
-                r++;
+                for (int col = 0; col < GameField.Width; col++) // Очищаем верхнюю строку
+                {
+                    gameField.Field[0, col] = 0;
+                }
+                row++;
             }
         }
 
-        score += linesCleared switch
+        score += linesCleared switch // Начисление очков в зависимости от количества очищенных линий
         {
             1 => 100,
             2 => 300,
@@ -258,18 +245,17 @@ class Program
             _ => 0
         };
     }
-
     static void Draw() // Отрисовка игрового поля и текущей фигуры
     {
         Console.SetCursorPosition(0, 0);
 
         Console.WriteLine("╔════════════════════╗");
 
-        for (int r = 0; r < Height; r++)
+        for (int r = 0; r < GameField.Height; r++)
         {
             Console.Write("║");
 
-            for (int c = 0; c < Width; c++)
+            for (int c = 0; c < GameField.Width; c++)
             {
                 bool isPiece = false;
 
@@ -288,7 +274,7 @@ class Program
                 }
 
                 //если клетка занята
-                if (field[r, c] == 1)
+                if (gameField.Field[r, c] == 1)
                 {
                     Console.Write("██");
                 }
